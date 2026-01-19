@@ -10,15 +10,15 @@ sudo apt-get install -y --no-install-recommends \
   ca-certificates curl wget git unzip zip tar gzip bzip2 xz-utils \
   build-essential
 
-# Tool bioinfo che compaiono nei tuoi moduli:
-# - samtools per faidx e per SAM/BAM :contentReference[oaicite:5]{index=5} :contentReference[oaicite:6]{index=6}
-# - fastp + fastqc per pulizia/valutazione qualità :contentReference[oaicite:7]{index=7}
-# - bwa-mem2 per allineamento :contentReference[oaicite:8]{index=8}
-# - ncbi-blast+ per makeblastdb / blastn :contentReference[oaicite:9]{index=9}
+# Tool bioinfo:
+# - samtools per faidx e per SAM/BAM
+# - fastp + fastqc per pulizia/valutazione qualità
+# - bwa per allineamento (bwa-mem2 non disponibile via apt qui)
+# - ncbi-blast+ per makeblastdb / blastn
 sudo apt-get install -y --no-install-recommends \
   samtools bcftools vcftools \
   fastp fastqc \
-  bwa-mem2 \
+  bwa \
   ncbi-blast+
 
 # Verifiche “secche” (falliscono se manca qualcosa)
@@ -29,7 +29,7 @@ vcftools --version | head -n 1
 fastp --version
 fastqc --version
 
-bwa-mem2 version
+bwa 2>&1 | head -n 1
 
 makeblastdb -version | head -n 1
 blastn -version | head -n 1
