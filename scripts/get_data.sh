@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Concept DOI: risolve sempre all'ultima versione del record
+# Concept DOI: punta sempre all'ultima versione
 CONCEPT_DOI="10.5281/zenodo.18299619"
 
 OUTDIR="data"
 mkdir -p "$OUTDIR"
 
-# Nomi esatti dei file come compaiono su Zenodo
-FILES=("st1.fastq" "st2.fastq" "Ref122.fasta")
+# Nomi esatti dei file su Zenodo (devono combaciare)
+FILES_JSON='["st1.fastq","st2.fastq","Ref122.fasta"]'
 
 echo "Concept DOI: $CONCEPT_DOI"
 echo "Output:      $OUTDIR"
@@ -16,7 +16,6 @@ echo
 
 # 1) Risolvi il DOI e trova l'URL finale Zenodo (latest)
 FINAL_URL="$(curl -Ls -o /dev/null -w '%{url_effective}' "https://doi.org/${CONCEPT_DOI}")"
-
 if [[ -z "$FINAL_URL" ]]; then
   echo "ERRORE: non riesco a risolvere il DOI ${CONCEPT_DOI}" >&2
   exit 2
@@ -26,7 +25,6 @@ echo "DOI risolto a: $FINAL_URL"
 
 # 2) Estrai l'ID record dall'URL finale (…/records/<id>)
 RECORD_ID="$(echo "$FINAL_URL" | sed -n 's#.*zenodo\.org/records/\([0-9]\+\).*#\1#p')"
-
 if [[ -z "$RECORD_ID" ]]; then
   echo "ERRORE: non riesco a estrarre RECORD_ID da: $FINAL_URL" >&2
   echo "Atteso un URL tipo: https://zenodo.org/records/<ID>" >&2
@@ -36,14 +34,14 @@ fi
 echo "Record ID:   $RECORD_ID"
 echo
 
-# 3) Scarica i file usando Zenodo API (link 'download' per ciascun file)
-python3 - <<PY
+# 3) Scarica i file usando Zenodo API
+RECORD_ID="$RECORD_ID" OUTDIR="$OUTDIR" FILES_JSON="$FILES_JSON" python3 - <<'PY'
 import json, os, sys, urllib.request
 from urllib.error import HTTPError, URLError
 
-record_id = os.environ.get("RECORD_ID", "${RECORD_ID}")
-outdir = os.environ.get("OUTDIR", "${OUTDIR}")
-files_needed = ${FILES!r}
+record_id = os.environ["RECORD_ID"]
+outdir = os.environ["OUTDIR"]
+files_needed = json.loads(os.environ["FILES_JSON"])
 
 api = f"https://zenodo.org/api/records/{record_id}"
 
@@ -65,7 +63,6 @@ files = data.get("files") or []
 if not files:
     die("ERRORE: nessun file trovato nel record (campo 'files' vuoto).")
 
-# Mappa nomefile -> URL download
 m = {}
 for f in files:
     key = f.get("key")
@@ -76,18 +73,16 @@ for f in files:
 
 missing = [x for x in files_needed if x not in m]
 if missing:
-    die("ERRORE: questi file non risultano nel record Zenodo:\\n  - " + "\\n  - ".join(missing) +
-        "\\nControlla i nomi su Zenodo (maiuscole/minuscole contano).", 4)
+    die("ERRORE: questi file non risultano nel record Zenodo:\n  - " + "\n  - ".join(missing) +
+        "\nControlla i nomi su Zenodo (maiuscole/minuscole contano).", 4)
 
-print("Trovati i link. Download in corso...\\n")
-
+print("Trovati i link. Download in corso...\n")
 os.makedirs(outdir, exist_ok=True)
 
 for name in files_needed:
     url = m[name]
     outpath = os.path.join(outdir, name)
     print(f"- {name}  ->  {outpath}")
-
     try:
         with urllib.request.urlopen(url) as resp, open(outpath, "wb") as out:
             while True:
@@ -98,7 +93,7 @@ for name in files_needed:
     except Exception as e:
         die(f"ERRORE durante il download di {name}: {e}", 5)
 
-print("\\nOK. File scaricati in:", outdir)
+print("\nOK. File scaricati in:", outdir)
 PY
 
 echo
