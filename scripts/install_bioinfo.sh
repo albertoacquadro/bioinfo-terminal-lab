@@ -21,6 +21,15 @@ sudo apt-get install -y --no-install-recommends \
   bwa \
   ncbi-blast+
 
+# vcfutils.pl (se non presente nel PATH, lo installo)
+if ! command -v vcfutils.pl >/dev/null 2>&1; then
+  sudo apt-get install -y --no-install-recommends perl curl
+  sudo curl -L -o /usr/local/bin/vcfutils.pl \
+    https://raw.githubusercontent.com/samtools/bcftools/develop/misc/vcfutils.pl
+  sudo chmod +x /usr/local/bin/vcfutils.pl
+fi
+
+
 # Verifiche “secche” (falliscono se manca qualcosa)
 samtools --version | head -n 1
 bcftools --version | head -n 1
