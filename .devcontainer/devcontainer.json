@@ -1,0 +1,12 @@
+{
+  "name": "Bioinfo (Ubuntu 22.04)",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu-22.04",
+  "postCreateCommand": "bash scripts/install_bioinfo.sh",
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "bash"
+      }
+    }
+  }
+}
