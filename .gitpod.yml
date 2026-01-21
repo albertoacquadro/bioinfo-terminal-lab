@@ -1,1 +1,21 @@
-test
+tasks:
+  - name: WELCOME
+    command: |
+      echo ""
+      echo "=============================="
+      echo " bioinfo-terminal-lab (Ona)   "
+      echo "=============================="
+      echo ""
+      echo "COSA FARE ORA (2 comandi):"
+      echo "  1) Verifica tool:"
+      echo "       ./scripts/check_env.sh"
+      echo "  2) Scarica i dati:"
+      echo "       ./scripts/get_data.sh"
+      echo ""
+      echo "NOTE:"
+      echo " - La prima creazione ambiente lancia automaticamente:"
+      echo "     bash scripts/install_bioinfo.sh"
+      echo " - Se riapri lo STESSO environment ritrovi il lavoro."
+      echo " - Se crei un NUOVO environment, riesegui get_data.sh."
+      echo ""
+      exec bash
