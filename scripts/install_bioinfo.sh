@@ -44,3 +44,17 @@ makeblastdb -version | head -n 1
 blastn -version | head -n 1
 
 echo "OK: ambiente bioinfo installato."
+
+
+# --- Welcome message in every new terminal (for students) ---
+WELCOME_SNIPPET='
+# bioinfo-terminal-lab welcome (auto)
+if [ -f "$PWD/scripts/welcome_terminal.sh" ]; then
+  bash "$PWD/scripts/welcome_terminal.sh" || true
+fi
+'
+
+if ! grep -q "bioinfo-terminal-lab welcome" "$HOME/.bashrc" 2>/dev/null; then
+  echo "$WELCOME_SNIPPET" >> "$HOME/.bashrc"
+fi
+
